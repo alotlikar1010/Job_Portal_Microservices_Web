@@ -7,6 +7,8 @@ import getBuffer from "../utils/buffer.js"
 import jwt from "jsonwebtoken";
 import express from "express";
 import multer from "multer";
+import { publishToTopic } from "../producer.js";
+import { forgotPasswordTemplate } from "../template.js";
 
 export const registerUser = tryCatch( async(req, res , next) =>{
 
@@ -112,3 +114,48 @@ export const loginUser = tryCatch(async (req, res, next) => {
     token,
   });
 });
+
+
+export const forgotPassword = tryCatch(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ErrorHandler(400, "email is required");
+  }
+
+  const users =
+    await sql`SELECT user_id, email FROM users WHERE email = ${email}`;
+
+  if (users.length === 0) {
+    return res.json({
+      message: "If that email exists, we have sent a reset link",
+    });
+  }
+  const user = users[0];
+
+  const resetToken = jwt.sign(
+    {
+      email: user.email,
+      type: "reset",
+    },
+    process.env.JWT_SEC as string,
+    { expiresIn: "15m" }
+  );
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset/${resetToken}`;
+
+  const message = {
+    to: email,
+    subject: "RESET Your Password - hireheaven",
+    html: forgotPasswordTemplate(resetLink),
+  };
+
+  publishToTopic("send-mail", message).catch((error) => {
+    console.error("failed to send message", error);
+  });
+
+  res.json({
+    message: "If that email exists, we have sent a reset link",
+  });
+});
+
