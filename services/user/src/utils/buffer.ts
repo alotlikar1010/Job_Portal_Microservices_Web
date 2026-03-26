@@ -1,0 +1,14 @@
+import DataUriParser from "datauri/parser.js";
+import path from 'path'
+
+const getbuffer = (file:any) =>{
+
+    const parser = new DataUriParser();
+
+    const extName = path.extname(file.orginalname).toString();
+
+    return parser.format(extName, file.buffer)
+};
+
+
+export default getbuffer;
