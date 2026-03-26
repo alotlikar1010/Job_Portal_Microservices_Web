@@ -9,6 +9,7 @@ import express from "express";
 import multer from "multer";
 import { publishToTopic } from "../producer.js";
 import { forgotPasswordTemplate } from "../template.js";
+import { redisClient } from "../index.js";
 
 export const registerUser = tryCatch( async(req, res , next) =>{
 
@@ -144,6 +145,10 @@ export const forgotPassword = tryCatch(async (req, res, next) => {
 
   const resetLink = `${process.env.FRONTEND_URL}/reset/${resetToken}`;
 
+    await redisClient.set(`forgot:${email}`, resetToken, {
+      EX: 900,
+    });
+
   const message = {
     to: email,
     subject: "RESET Your Password - hireheaven",
@@ -159,3 +164,43 @@ export const forgotPassword = tryCatch(async (req, res, next) => {
   });
 });
 
+export const resetPassword = tryCatch(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  let decoded: any;
+
+  try {
+    decoded = jwt.verify(token as string, process.env.JWT_SEC as string);
+  } catch (error) {
+    throw new ErrorHandler(400, "Expired token");
+  }
+
+  if (decoded.type !== "reset") {
+    throw new ErrorHandler(400, "Invalid token type");
+  }
+
+  const email = decoded.email;
+
+  const stroredToken = await redisClient.get(`forgot:${email}`);
+
+  if (!stroredToken || stroredToken !== token) {
+    throw new ErrorHandler(400, "token has been expired");
+  }
+
+  const users = await sql`SELECT user_id FROM users WHERE email = ${email}`;
+
+  if (users.length === 0) {
+    throw new ErrorHandler(404, "User not found");
+  }
+
+  const user = users[0];
+
+  const hashPassword = await bcrypt.hash(password, 10);
+
+  await sql`UPDATE users SET password = ${hashPassword} WHERE user_id = ${user.user_id}`;
+
+  await redisClient.del(`forgot:${email}`);
+
+  res.json({ message: "Password changed successfully" });
+});
