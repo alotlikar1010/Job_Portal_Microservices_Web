@@ -1,11 +1,12 @@
+import { Button } from '@/components/ui/button'
 import React from 'react'
 
-const page = () => {
+const Home = () => {
   return (
     <div>
-      Home page
+    <Button> Shadcdn </Button>
     </div>
   )
 }
 
-export default page
+export default Home
