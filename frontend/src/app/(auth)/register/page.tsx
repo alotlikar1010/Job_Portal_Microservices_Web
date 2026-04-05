@@ -35,6 +35,8 @@ const registerpage = () => {
     setBtnLoading(true);
     const formData = new FormData();
 
+    console.log(formData)
+
     formData.append("role", role);
     formData.append("name", name);
     formData.append("email", email);
