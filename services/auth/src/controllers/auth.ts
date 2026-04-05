@@ -40,22 +40,30 @@ export const registerUser = tryCatch( async(req, res , next) =>{
     }
     else if(role == "jobseeker") {
 
-        const file = req.file as Express.Multer.File
-        if(!file){
-            throw new ErrorHandler(400, "Resume file is required")
-        }
-        const filebuffer = getBuffer(file)
-        if(!filebuffer){
-            throw new ErrorHandler(500, "Failed to generate buffer")
-        }
-    const {data} = await axios.post(`${process.env.UPLOAD_SERVICES}/api/utils/upload`,{buffer:filebuffer.content})
+    //     const file = req.file as Express.Multer.File
+    //     if(!file){
+    //         throw new ErrorHandler(400, "Resume file is required")
+    //     }
+    //     const filebuffer = getBuffer(file)
+    //     if(!filebuffer){
+    //         throw new ErrorHandler(500, "Failed to generate buffer")
+    //     }
+    // const {data} = await axios.post(`${process.env.UPLOAD_SERVICES}/api/utils/upload`,{buffer:filebuffer.content})
 
 
 
+        // const [user] = await sql `INSERT INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id )
+        // Values (${name} , ${email}, ${hashPassword}, ${phoneNumber} , ${role} ${data.url}, ${data.public_id}) RETURINING
+        // user_id, name, email, phone_number, role, bio, resume, created_at`;
+        // registerUser = user;    
+
+        //testing
         const [user] = await sql `INSERT INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id )
-        Values (${name} , ${email}, ${hashPassword}, ${phoneNumber} , ${role} ${data.url}, ${data.public_id}) RETURINING
+        Values (${name} , ${email}, ${hashPassword}, ${phoneNumber} , ${role},${bio} ,'test','67') RETURNING
         user_id, name, email, phone_number, role, bio, resume, created_at`;
         registerUser = user;    
+
+        
     }
      const token = jwt.sign(
         { id: registerUser?.user_id },
