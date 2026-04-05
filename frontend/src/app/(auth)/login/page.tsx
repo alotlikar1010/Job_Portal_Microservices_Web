@@ -10,7 +10,7 @@ import { ArrowRight, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import Loading from "@/components/loading";
 const loginpage = () => {
 
 const [email ,setEmail] = useState("");
@@ -19,7 +19,7 @@ const [btnLoading ,setBtnLoading] = useState(false);
 
 const {isAuth , setUser , loading , setIsAuth,fetchApplications} = useAppData();
 
-  // if (loading) return <Loading />;
+  if (loading) return <Loading />;
 
   if (isAuth) return redirect("/");
 
