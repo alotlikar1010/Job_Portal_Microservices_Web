@@ -45,16 +45,21 @@ const registerpage = () => {
 
     if (role === "jobseeker") {
       formData.append("bio", bio);
-      if (resume) {
-        formData.append("file", resume);
-      }
+      // if (resume) {
+      //   formData.append("file", resume);
+      // }
     }
     try {
       const { data } = await axios.post(
         `${auth_service}/api/auth/register`,
-        formData
+       {
+        name,
+        email,
+        password,
+        phoneNumber,
+        role
+    }
       );
-
       toast.success(data.message);
 
       Cookies.set("token", data.token, {
