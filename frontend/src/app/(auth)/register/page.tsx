@@ -45,20 +45,14 @@ const registerpage = () => {
 
     if (role === "jobseeker") {
       formData.append("bio", bio);
-      // if (resume) {
-      //   formData.append("file", resume);
-      // }
+      if (resume) {
+        formData.append("file", resume);
+        console.log(resume)
+      }
     }
     try {
       const { data } = await axios.post(
-        `${auth_service}/api/auth/register`,
-       {
-        name,
-        email,
-        password,
-        phoneNumber,
-        role
-    }
+        `${auth_service}/api/auth/register`, formData,
       );
       toast.success(data.message);
 
